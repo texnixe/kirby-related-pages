@@ -1,6 +1,6 @@
 # Kirby Related Pages
 
-Related Pages is a [Kirby CMS](https://getkirby.com) plugin that lets you fetch pages related to the current page based on matching values in a given field.
+Related Pages is a [Kirby CMS](https://getkirby.com) plugin that lets you fetch pages related to the current page based on matching values in a given field. The resulting collection is sorted by number of matches as an indicator of relevance.
 
 Example:
 The current page has a tags field with three values (red, green, blue). You want to find all sibling pages with at least 2 matching tag values.
