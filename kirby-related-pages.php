@@ -2,7 +2,7 @@
 /**
  * Kirby Related Pages Plugin
  *
- * @version   1.0.0
+ * @version   1.1.0
  * @author    Sonja Broda <info@texniq.de>
  * @copyright Sonja Broda <info@texniq.de>
  * @link      https://github.com/texnixe/kirby-related
@@ -18,7 +18,7 @@ function getRelatedPages($options = array()) {
     'searchField'      => 'tags',
     'matches'          => 1,
     'delimiter'        => ',',
-    'languageFilter'   => false
+    'languageFilter'   => false,
   );
 
   // Merge default and user options
@@ -37,21 +37,31 @@ function getRelatedPages($options = array()) {
   $searchItems     = $activePage->$searchField()->split(',');
   $noOfSearchItems = count($searchItems);
 
-   // adjust no. of matches
-  $matches > $noOfSearchItems? $matches = $noOfSearchItems: $matches;
+  if($noOfSearchItems > 0):
 
-  // filter pages with hits greater or equal to given hitrate
-  $relatedPages = $searchCollection->not($activePage)->filter(function($p) use($searchItems, $searchField, $matches, $delimiter){
-    return count(array_intersect($searchItems, $p->$searchField()->split($delimiter))) >= $matches;
-  });
+     // no. of matches can't be greater than no. of searchItems
+    $matches > $noOfSearchItems? $matches = $noOfSearchItems: $matches;
 
-  // filter collection by current language
-  if(site()->multilang() && $languageFilter) {
-    $relatedPages = $relatedPages->filter(function($p) {
-      return $p->content(site()->language()->code())->exists();
-    });
-  }
+    // filter pages with matches greater or equal to given match rate and sort by relevance
+    $relatedPages = new Pages();
 
-  // return result collection
-  return $relatedPages;
+    for($i = $noOfSearchItems; $i >= $matches; $i--) {
+      $relevant{$i} = $searchCollection->not($activePage)->filter(function($p) use($searchItems, $searchField, $delimiter, $i){
+        return count(array_intersect($searchItems, $p->$searchField()->split($delimiter))) == $i;
+      });
+      $relatedPages->add($relevant{$i});
+    }
+
+    // filter collection by current language
+    if(site()->multilang() && $languageFilter) {
+      $relatedPages = $relatedPages->filter(function($p) {
+        return $p->content(site()->language()->code())->exists();
+      });
+    }
+
+    // return result collection
+    return $relatedPages;
+  else:
+    return new Pages();
+  endif;
 }
