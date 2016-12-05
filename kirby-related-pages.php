@@ -9,12 +9,15 @@
  * @license   MIT
  */
 
+ page::$methods['related'] = function($page, $options = array()) {
+   return getRelatedPages($page, $options);
+ };
 
-function getRelatedPages($options = array()) {
+function getRelatedPages(Page $page, $options = array()) {
 
   // defaults
   $defaults = array(
-    'searchCollection' => site()->children()->index(),
+    'searchCollection' => $page->siblings(),
     'searchField'      => 'tags',
     'matches'          => 1,
     'delimiter'        => ',',
@@ -30,11 +33,11 @@ function getRelatedPages($options = array()) {
   $searchField      = str::lower($options['searchField']);
   $delimiter        = $options['delimiter'];
   $languageFilter   = $options['languageFilter'];
-  $activePage       = site()->activePage();
+
 
 
   // get search items from active page
-  $searchItems     = $activePage->$searchField()->split(',');
+  $searchItems     = $page->$searchField()->split(',');
   $noOfSearchItems = count($searchItems);
 
   if($noOfSearchItems > 0):
@@ -46,7 +49,7 @@ function getRelatedPages($options = array()) {
     $relatedPages = new Pages();
 
     for($i = $noOfSearchItems; $i >= $matches; $i--) {
-      $relevant{$i} = $searchCollection->not($activePage)->filter(function($p) use($searchItems, $searchField, $delimiter, $i){
+      $relevant{$i} = $searchCollection->not($page)->filter(function($p) use($searchItems, $searchField, $delimiter, $i){
         return count(array_intersect($searchItems, $p->$searchField()->split($delimiter))) == $i;
       });
       $relatedPages->add($relevant{$i});

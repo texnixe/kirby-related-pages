@@ -43,7 +43,7 @@ Run these commands to update the plugin:
 ```
 <?php
 
-$relatedPages = getRelatedPages();
+$relatedPages = $page->related($options);
 
 foreach($relatedPages as $p) {
   echo $p->title();
@@ -58,7 +58,7 @@ You can pass an array of options:
 
 ```
 <?php
-$relatedPages = getRelatedPages(array(
+$relatedPages = $page->related(array(
   'searchCollection' => $page->siblings()->visible(),
   'searchField'      => 'tags',
   'matches'          => 2,
